@@ -1,0 +1,615 @@
+<div id="k22-practice">
+<div class="k22-heading">
+  <div><h2>K2-2 · 电工接线实操</h2><div class="text-small text-muted">接触器互锁正反转 · 按视频孔位复原</div></div>
+  <span class="viz-badge" id="k22-power-tag">已断电</span>
+</div>
+<div class="viz-controls k22-toolbar">
+  <button type="button" class="btn btn-primary" id="k22-check">检查接线</button>
+  <button type="button" class="btn" id="k22-power">合闸试运行</button>
+  <button type="button" class="btn btn-ghost" id="k22-hint">下一根提示</button>
+  <button type="button" class="btn btn-ghost" id="k22-demo">完整参考接线</button>
+  <button type="button" class="btn btn-ghost" id="k22-undo">撤销</button>
+  <button type="button" class="btn btn-ghost" id="k22-new">清空练习</button>
+</div>
+<div class="viz-controls">
+  <label class="form-label">导线颜色<select class="form-select" id="k22-color">
+    <option value="yellow">黄 · L1</option><option value="green">绿 · L2</option>
+    <option value="red">红 · L3</option><option value="purple">紫 · 控制馈电</option>
+    <option value="orange">橙 · 按钮公共端</option><option value="pink">粉 · 线圈／启动</option>
+    <option value="teal">青 · 反转／互锁</option><option value="blue">蓝 · 线圈回路</option><option value="pe">黄绿 · PE</option>
+  </select></label>
+  <label class="form-label">视图<select class="form-select" id="k22-view"><option value="board">接线板</option><option value="scheme">电路原理图</option></select></label>
+  <label class="form-check"><input type="checkbox" class="form-check-input" id="k22-flow" checked><span class="form-check-label">显示带电线路</span></label>
+</div>
+<div class="viz-row text-small k22-counts">
+  <span id="k22-count" class="tabular-nums">导线 0 / 35</span>
+  <span>台架 68 孔 ＋ 电机 4 端子</span><span>练习单孔最多 2 根</span>
+  <span>控制电源 L1－L2 · 380 V</span>
+</div>
+<div id="k22-message" class="k22-message text-small" aria-live="polite">先点起点孔，再点终点孔接线。点导线可选中拆除。</div>
+<div id="k22-focus" class="text-small k22-focus" aria-live="polite">点击任意导线高亮；再点同一根或图中空白处取消。</div>
+<div id="k22-result" hidden></div>
+<div class="k22-visual">
+  <svg id="k22-board" class="k22-board" role="img" aria-label="K2-2接线板，台架68插孔与电机4端子"></svg>
+  <svg id="k22-scheme" class="k22-scheme" role="img" aria-label="三相电机接触器互锁正反转原理图" hidden></svg>
+</div>
+<div class="viz-row k22-status" aria-live="polite">
+  <span id="k22-km-status">KM1：释放 · KM2：释放</span><span id="k22-motor-status">电机：停止</span>
+  <span id="k22-coil-status" class="tabular-nums">线圈：0 V</span><span id="k22-fr-status">FR：正常</span>
+</div>
+<div class="viz-controls">
+  <button type="button" class="btn" id="k22-sb1" aria-pressed="false">按 SB1 · 正转启动</button>
+  <button type="button" class="btn" id="k22-sb2" aria-pressed="false">按 SB2 · 反转启动</button>
+  <button type="button" class="btn" id="k22-sb3" aria-pressed="false">按 SB3 · 停止</button>
+  <button type="button" class="btn" id="k22-trip">FR · 模拟过载</button>
+  <button type="button" class="btn btn-ghost" id="k22-fr-reset" disabled>FR · 复位</button>
+</div>
+<details class="k22-details">
+  <summary>用键盘接线／所选孔位</summary>
+  <div class="viz-controls">
+    <label class="form-label">起点<select class="form-select" id="k22-from"></select></label>
+    <label class="form-label">终点<select class="form-select" id="k22-to"></select></label>
+    <button type="button" class="btn" id="k22-connect">连接</button>
+    <button type="button" class="btn btn-ghost" id="k22-delete" disabled>拆除所选导线</button>
+  </div>
+  <div id="k22-selected" class="text-small" aria-live="polite">未选择孔位</div>
+</details>
+<details class="k22-details" id="k22-wire-details">
+  <summary id="k22-wire-summary">导线清单 · 0 根</summary>
+  <table class="table table-sm"><thead><tr><th>导线</th><th>起点 → 终点</th><th>操作</th></tr></thead><tbody id="k22-wire-list"></tbody></table>
+</details>
+<details class="k22-details">
+  <summary>视频来源</summary>
+  <div class="text-small k22-evidence">
+    <a href="https://www.bilibili.com/video/BV1t8c8eZE1t" target="_blank" rel="noopener noreferrer">轻松学电工 · 原视频（4分01秒）</a>
+  </div>
+</details>
+</div>
+<style>
+#k22-practice{width:100%;color:var(--foreground)}
+#k22-practice .k22-heading{display:flex;justify-content:space-between;align-items:center;gap:16px;padding-right:96px;flex-wrap:wrap;margin-bottom:12px}
+#k22-practice h2{margin:0 0 4px}
+#k22-practice .k22-toolbar{margin-bottom:8px}
+#k22-practice .k22-counts{margin:12px 0 6px;gap:8px 20px}
+#k22-practice .k22-message{min-height:2em;margin:6px 0;overflow-wrap:anywhere}
+#k22-practice .k22-visual{position:relative;width:100%}
+#k22-practice .k22-board,#k22-practice .k22-scheme{width:100%;display:block;overflow:visible}
+#k22-practice [hidden]{display:none!important}
+#k22-practice .k22-status{margin:8px 0 12px;gap:10px 24px}
+#k22-practice .k22-details{margin:14px 0}
+#k22-practice .k22-details summary{color:var(--foreground)}
+#k22-practice .k22-details .viz-controls{margin-top:12px}
+#k22-practice .k22-evidence{display:grid;gap:8px;margin-top:10px}
+#k22-practice .k22-board text,#k22-practice .k22-scheme text{fill:var(--foreground);font-size:12px;font-weight:400;font-family:inherit}
+#k22-practice .k22-board .component-title{font-size:14px;font-weight:500}
+#k22-practice .device-shell{fill:var(--card);stroke:var(--border);stroke-width:1.5}
+#k22-practice .device-dark{fill:var(--secondary);stroke:var(--border);stroke-width:1}
+#k22-practice .device-face{fill:var(--muted);stroke:var(--border);stroke-width:1}
+#k22-practice .screw-ring{fill:var(--input);stroke:var(--muted-foreground);stroke-width:1.5}
+#k22-practice .screw-hole{fill:var(--foreground)}
+#k22-practice .screw-slot{stroke:var(--card);stroke-width:1.5}
+#k22-practice .node.selected .screw-ring{stroke:var(--ring);stroke-width:3}
+#k22-practice .node.hinted .screw-ring{stroke:var(--orange);stroke-width:3}
+#k22-practice .node.invalid .screw-ring{stroke:var(--destructive);stroke-width:3}
+#k22-practice .node .count{fill:var(--foreground);font-size:11px}
+#k22-practice .node-hit{fill:transparent}
+#k22-practice .device-label{fill:var(--card);stroke:none}
+#k22-practice .heading-label{fill:var(--background);stroke:none}
+#k22-practice .wire-hit{fill:none;stroke:transparent;stroke-width:16;pointer-events:stroke}
+#k22-practice .wire{fill:none;stroke-linejoin:round;stroke-linecap:round;stroke-width:2.8;pointer-events:none}
+#k22-practice .wire.selected{stroke-width:5}
+#k22-practice .wire.deenergized{opacity:.32}
+#k22-practice .wire.electric{stroke-width:4}
+#k22-practice .k22-focus{margin:4px 0 10px;overflow-wrap:anywhere}
+#k22-practice .wire-layer.has-selection .wire-group:not(.wire-focused) .wire{opacity:.15;stroke-width:2}
+#k22-practice .wire-layer .wire-group.wire-focused .wire{opacity:1;stroke-width:6}
+#k22-practice .wire-highlight-halo{fill:none;stroke:var(--ring);stroke-width:12;stroke-linecap:round;stroke-linejoin:round;opacity:.5;pointer-events:none}
+#k22-practice .node.wire-endpoint .screw-ring{stroke:var(--ring);stroke-width:3.5}
+#k22-practice .wire-endpoint-ring{fill:none;stroke:var(--ring);stroke-width:2;pointer-events:none}
+#k22-practice .contact-path{fill:none;stroke:var(--foreground);stroke-width:1.5;stroke-linecap:round;stroke-linejoin:round}
+#k22-practice .contact-path.on{stroke:var(--green);stroke-width:2.4}
+#k22-practice .rail{stroke:var(--border);stroke-width:1.5}
+#k22-practice .live-mark{fill:var(--green)}
+#k22-practice .muted-label{fill:var(--muted-foreground)}
+#k22-practice .k22-findings{margin:8px 0;padding-left:20px}
+#k22-practice .k22-findings li{margin:5px 0;overflow-wrap:anywhere}
+@media(max-width:520px){#k22-practice .k22-heading{padding-right:0;padding-top:12px}}
+</style>
+<script>
+(() => {
+'use strict';
+const root=document.getElementById('k22-practice');
+const $=id=>root.querySelector('#k22-'+id);
+const NS='http://www.w3.org/2000/svg';
+const nodes=[],nodeMap=new Map();
+const devices=[
+{id:'QF',name:'电源 · QF',sub:'三相输出＋PE',kind:'source',height:162},
+{id:'FU',name:'熔断器 · FU1－FU5',sub:'前三只主回路，后两只控制回路',kind:'fuse',height:170},
+{id:'KM1',name:'交流接触器 · KM1 正转',sub:'右侧 NO₂ 自锁；NC₂ 互锁',kind:'contactor',height:264},
+{id:'KM2',name:'交流接触器 · KM2 反转',sub:'右侧 NO₂ 自锁；NC₁ 互锁',kind:'contactor',height:264},
+{id:'FR',name:'热继电器 · FR',sub:'95－96 常闭，97－98 常开',kind:'relay',height:234},
+{id:'M',name:'电机 · M 3~',sub:'正转 L1-L2-L3；反转 L3-L2-L1',kind:'motor',height:170},
+{id:'SB1',name:'SB1 · 正转启动',sub:'左 NO 3－4；右 NC 空置',kind:'button',height:208},
+{id:'SB2',name:'SB2 · 反转启动',sub:'左 NO 3－4；右 NC 空置',kind:'button',height:208},
+{id:'SB3',name:'SB3 · 停止',sub:'右 NC 1－2；左 NO 空置',kind:'button',height:208}
+];
+function add(id,dev,label,desc,cap=2){const n={id,dev,label,desc,cap};nodes.push(n);nodeMap.set(id,n);}
+['L1','L2','L3'].forEach(p=>add('QF.'+p,'QF',p,p+'相输出'));
+add('QF.PE','QF','PE','保护接地');
+for(let i=1;i<=5;i++){add('FU'+i+'.in','FU','FU'+i+'↑','熔断器'+i+'上端');add('FU'+i+'.out','FU','FU'+i+'↓','熔断器'+i+'下端');}
+for(const k of ['KM1','KM2']){
+['L1','L2','L3'].forEach((p,i)=>add(k+'.'+p,k,p,(i*2+1)+'/'+p+'主触点上端'));
+['T1','T2','T3'].forEach((p,i)=>add(k+'.'+p,k,p,(i*2+2)+'/'+p+'主触点下端'));
+['A1','A2'].forEach(p=>add(k+'.'+p,k,p,'接触器线圈'+p));
+['NO1','NC1','NC2','NO2'].forEach(p=>{
+const t=p.slice(0,2)+(p.endsWith('1')?'₁':'₂');
+add(k+'.'+p+'.up',k,t+'↑',p+'辅助触点上端');
+add(k+'.'+p+'.down',k,t+'↓',p+'辅助触点下端');
+});
+}
+['L1','L2','L3','T1','T2','T3'].forEach(p=>add('FR.'+p,'FR',p,'热继电器主回路'+p));
+['95','96','97','98'].forEach(p=>add('FR.'+p,'FR',p,p==='95'||p==='96'?'过载保护常闭触点':'过载指示常开触点'));
+for(let i=1;i<=3;i++){
+add('SB'+i+'.NC.up','SB'+i,'1 · NC↑','常闭触点上端1');
+add('SB'+i+'.NC.down','SB'+i,'2 · NC↓','常闭触点下端2');
+add('SB'+i+'.NO.up','SB'+i,'3 · NO↑','常开触点上端3');
+add('SB'+i+'.NO.down','SB'+i,'4 · NO↓','常开触点下端4');
+}
+['U','V','W','PE'].forEach(p=>add('M.'+p,'M',p,p==='PE'?'电机外壳保护接地':'电机相端子'+p,1));
+const reference=[];
+function ref(a,b,color,why){reference.push({a,b,color,why});}
+const phases=['L1','L2','L3'],phaseColors=['yellow','green','red'];
+phases.forEach((p,i)=>ref('QF.'+p,'FU'+(i+1)+'.in',phaseColors[i],'三相电源进入主熔断器'));
+phases.forEach((p,i)=>ref('FU'+(i+1)+'.out','KM1.'+p,phaseColors[i],'主熔断器输出接KM1主触点上端'));
+phases.forEach((p,i)=>ref('KM1.'+p,'KM2.'+p,phaseColors[i],'两个接触器主回路输入同相并联'));
+[1,2,3].forEach(i=>ref('KM1.T'+i,'FR.L'+i,phaseColors[i-1],'正转输出按原相序进入热继电器'));
+[1,2,3].forEach(i=>ref('KM2.T'+i,'FR.L'+(4-i),phaseColors[3-i],'反转对调L1、L3；交叉不代表连接'));
+['U','V','W'].forEach((p,i)=>ref('FR.T'+(i+1),'M.'+p,phaseColors[i],'热元件下端接电机相端子'));
+ref('QF.PE','M.PE','pe','保护地接电机外壳');
+ref('QF.L1','FU4.in','yellow','控制回路取L1相');
+ref('FU4.out','FR.96','orange','L1经FU4进入FR常闭触点');
+ref('FR.95','SB3.NC.up','red','FR常闭串联停止按钮右侧NC上孔');
+ref('SB3.NC.down','SB1.NO.up','purple','停止输出接正转启动左侧NO上孔');
+ref('SB1.NO.up','SB2.NO.up','purple','两个启动按钮公共端串接');
+ref('SB2.NO.up','KM1.NO2.up','purple','公共端接KM1右侧NO自锁输入');
+ref('KM1.NO2.up','KM2.NO2.up','purple','两只接触器自锁输入同节点');
+ref('SB1.NO.down','KM1.NO2.down','purple','正转按钮与KM1自锁NO并联');
+ref('KM1.NO2.down','KM2.NC1.up','purple','正转输出串入KM2左侧NC互锁上孔');
+ref('KM2.NC1.down','KM1.A1','teal','反转接触器常闭互锁后接正转线圈');
+ref('SB2.NO.down','KM2.NO2.down','teal','反转按钮与KM2自锁NO并联');
+ref('KM2.NO2.down','KM1.NC2.up','teal','反转输出串入KM1右侧NC互锁上孔');
+ref('KM1.NC2.down','KM2.A1','teal','正转接触器常闭互锁后接反转线圈');
+ref('QF.L2','FU5.in','green','控制回路取L2相');
+ref('FU5.out','KM1.A2','blue','正转线圈A2经FU5回L2');
+ref('KM1.A2','KM2.A2','blue','两只线圈A2并联共用回路');
+const colorNames={yellow:'黄',green:'绿',red:'红',purple:'紫',orange:'橙',pink:'粉',blue:'蓝',teal:'青',pe:'黄绿'};
+const colorValues={yellow:'var(--yellow)',green:'var(--green)',red:'var(--red)',purple:'var(--purple)',orange:'var(--orange)',pink:'color-mix(in srgb,var(--purple) 55%,var(--red))',blue:'var(--blue)',teal:'color-mix(in srgb,var(--green) 55%,var(--blue))',pe:'var(--green)'};
+const model={version:1,circuit:'K2-2',nodes,devices,reference,source:'BV1t8c8eZE1t'};
+let wires=[],nextId=1,selected=null,selectedWire=null,hints=[],invalid=[],undo=[];
+let power=false,km1=false,km2=false,tripped=false,press={SB1:false,SB2:false,SB3:false};
+let coilV=0,motor=false,direction='stop',coilV2=0,phaseGraph=null,view='board',flow=true;
+let positions=new Map(),boxMap=new Map(),result=null;
+const stateOrigin='k22-'+Math.random().toString(36).slice(2);
+function label(id){const n=nodeMap.get(id);return n.dev+' · '+n.label;}
+class DSU{
+constructor(){this.p=new Map(nodes.map(n=>[n.id,n.id]));}
+find(a){let p=this.p.get(a);if(p!==a){p=this.find(p);this.p.set(a,p);}return p;}
+join(a,b){if(!this.p.has(a)||!this.p.has(b))return;let x=this.find(a),y=this.find(b);if(x!==y)this.p.set(x,y);}
+same(a,b){return this.find(a)===this.find(b);}
+}
+function bare(){const d=new DSU();wires.forEach(w=>d.join(w.a,w.b));return d;}
+const expected=new DSU();reference.forEach(w=>expected.join(w.a,w.b));
+const expectedGroups=new Map();
+nodes.forEach(n=>{const k=expected.find(n.id);if(!expectedGroups.has(k))expectedGroups.set(k,[]);expectedGroups.get(k).push(n.id);});
+const usefulGroups=[...expectedGroups.values()].filter(g=>g.length>1);
+function count(id){return wires.filter(w=>w.a===id||w.b===id).length;}
+function pushUndo(){undo.push(wires.map(w=>({...w})));if(undo.length>35)undo.shift();}
+function message(s,error=false){$('message').textContent=s;$('message').classList.toggle('text-destructive',error);}
+function save(){
+if(!window.openai||typeof window.openai.setWidgetState!=='function')return;
+const privateContent={version:1,circuit:'K2-2',origin:stateOrigin,wires:wires.map(({a,b,color,id})=>({a,b,color,id})),color:$('color').value,view,flow,wireFocus:focusedWire()?{a:focusedWire().a,b:focusedWire().b}:null};
+const modelContent={circuit:'K2-2接触器互锁正反转',simulation:{power,km1,km2,direction,coilV,coilV2,tripped},video:'BV1t8c8eZE1t',wireCount:wires.length,correct:result?result.ok:null,selectedWire:focusedWire()?{id:focusedWire().id,a:focusedWire().a,b:focusedWire().b}:null,connections:wires.map(w=>[w.a,w.b])};
+window.openai.setWidgetState({modelContent,privateContent}).catch(()=>{});
+}
+function restore(snapshot){
+const s=snapshot?.privateContent||snapshot;
+if(!s||s.version!==1||s.circuit!=='K2-2'||!Array.isArray(s.wires)||s.origin===stateOrigin)return;
+const packed=ws=>JSON.stringify(ws.map(w=>[w.a,w.b,w.color,w.id]));
+if(packed(s.wires)===packed(wires)&&s.view===view&&s.flow===flow&&s.color===$('color').value&&JSON.stringify(s.wireFocus||null)===JSON.stringify(focusedWire()?{a:focusedWire().a,b:focusedWire().b}:null))return;
+wires=s.wires.filter(w=>nodeMap.has(w.a)&&nodeMap.has(w.b)&&w.a!==w.b&&colorValues[w.color]).slice(0,80).map((w,i)=>({...w,id:i+1}));
+nextId=wires.length+1;power=false;km1=false;km2=false;tripped=false;press={SB1:false,SB2:false,SB3:false};
+if(colorValues[s.color])$('color').value=s.color;
+view=s.view==='scheme'?'scheme':'board';flow=s.flow!==false;$('view').value=view;$('flow').checked=flow;
+result=null;selected=null;selectedWire=wires.find(w=>w.a===s.wireFocus?.a&&w.b===s.wireFocus?.b)?.id||null;hints=[];invalid=[];undo=[];settle();renderAll();
+}
+function check(render=true){
+const d=bare(),errors=[],bad=new Set();let complete=0;
+wires.forEach(w=>{if(!expected.same(w.a,w.b)){errors.push('误接：'+label(w.a)+' → '+label(w.b)+'。这两个孔不属于同一电气节点。');bad.add(w.a);bad.add(w.b);}});
+nodes.forEach(n=>{if(count(n.id)>n.cap){errors.push(label(n.id)+'超过'+n.cap+'根导线。');bad.add(n.id);}});
+usefulGroups.forEach(g=>{
+const ok=g.every(n=>d.same(n,g[0]));
+if(ok)complete++;
+else{
+const clusters=new Map();g.forEach(n=>{const k=d.find(n);if(!clusters.has(k))clusters.set(k,[]);clusters.get(k).push(n);});
+errors.push('缺线：'+[...clusters.values()].map(ns=>ns.map(label).join('、')).join(' ↔ '));g.forEach(n=>bad.add(n));
+}
+});
+if(wires.length>reference.length&&errors.length===0)errors.push('电气连通正确，但存在多余环线；参考接线为35根，拆除冗余导线后再试。');
+result={ok:errors.length===0,errors,complete,total:usefulGroups.length};invalid=[...bad];
+if(render){
+showResult();message(result.ok?'接线通过：'+usefulGroups.length+'组电气节点连通正确，35根导线，PE完整。可以合闸试运行。':'发现'+errors.length+'项问题，错误孔位已标出。',!result.ok);renderBoard();save();
+}
+return result;
+}
+function showResult(){
+const el=$('result');el.replaceChildren();el.hidden=!result;if(!result)return;
+el.setAttribute('role',result.ok?'status':'alert');
+const line=document.createElement('div');line.className=result.ok?'text-small':'text-small text-destructive';
+line.textContent=(result.ok?'检查通过':'检查未通过')+' · 电气节点 '+result.complete+' / '+result.total;el.append(line);
+if(result.errors.length){
+const det=document.createElement('details');det.open=true;
+const sum=document.createElement('summary');sum.textContent='查看 '+result.errors.length+' 项检查结果';det.append(sum);
+const ul=document.createElement('ul');ul.className='k22-findings text-small';
+result.errors.slice(0,15).forEach(e=>{const li=document.createElement('li');li.textContent=e;ul.append(li);});
+if(result.errors.length>15){const li=document.createElement('li');li.textContent='其余'+(result.errors.length-15)+'项将在补线后继续检查。';ul.append(li);}
+det.append(ul);el.append(det);
+}
+}
+function canEdit(){if(power){message('先分闸，再修改接线。',true);return false;}return true;}
+function connect(a,b,color=$('color').value){
+if(!canEdit())return false;
+if(!nodeMap.has(a)||!nodeMap.has(b)){message('请选择两个有效孔位。',true);return false;}
+if(a===b){message('起点和终点不能是同一个孔。',true);return false;}
+if(wires.some(w=>(w.a===a&&w.b===b)||(w.a===b&&w.b===a))){message('这两个孔已直接相连。',true);return false;}
+if(count(a)>=nodeMap.get(a).cap||count(b)>=nodeMap.get(b).cap){message('孔位已满，请先拆线。单孔最多2根，电机相端子为1根。',true);return false;}
+pushUndo();wires.push({id:nextId++,a,b,color});selected=null;selectedWire=null;hints=[];invalid=[];result=null;
+message('已接：'+label(a)+' → '+label(b)+' · '+colorNames[color]+'线');settle();renderAll();save();return true;
+}
+function removeWire(id){
+if(!canEdit()||!wires.some(w=>w.id===id))return;
+pushUndo();wires=wires.filter(w=>w.id!==id);selectedWire=null;result=null;invalid=[];hints=[];
+message('所选导线已拆除。');settle();renderAll();save();
+}
+function pickNode(id){
+const n=nodeMap.get(id);$('selected').textContent=label(id)+' · '+n.desc+' · 已接 '+count(id)+' / '+n.cap+' 根';
+if(power){message('当前已合闸：'+label(id)+'。修改接线前请先分闸。');return;}
+if(selected===id){selected=null;message('已取消起点。');}
+else if(!selected){selected=id;selectedWire=null;$('from').value=id;message('起点：'+label(id)+'。请选择终点。');}
+else{$('to').value=id;connect(selected,id);return;}
+renderBoard();updateControls();
+}
+function focusedWire(){return wires.find(w=>w.id===selectedWire)||null;}
+function clearWireFocus(persist=true){
+selectedWire=null;selected=null;
+$('selected').textContent='未选择孔位';
+message('已取消导线高亮；点击另一根导线查看完整走向。');
+renderBoard();updateControls();if(persist)save();
+}
+function selectWire(id){
+const w=wires.find(w=>w.id===id);if(!w)return;
+if(selectedWire===id){clearWireFocus();return;}
+selectedWire=id;selected=null;
+$('selected').textContent='导线'+id+' · '+label(w.a)+' → '+label(w.b)+' · '+colorNames[w.color]+'线';
+$('color').value=w.color;
+message('导线'+id+'已高亮；两端孔位已标记。再次点击这根线或空白处取消。');
+renderBoard();updateControls();save();
+}
+function nextHint(){
+if(!canEdit())return;const d=bare(),wrong=wires.find(w=>!expected.same(w.a,w.b));
+if(wrong){selectWire(wrong.id);message('先拆除误接：'+label(wrong.a)+' → '+label(wrong.b),true);return;}
+const w=reference.find(r=>!d.same(r.a,r.b)&&count(r.a)<nodeMap.get(r.a).cap&&count(r.b)<nodeMap.get(r.b).cap);
+if(!w){message(check(false).ok?'接线已完整，可以检查并合闸。':'有孔位被占满，请检查并调整接线。');return;}
+hints=[w.a,w.b];selected=null;selectedWire=null;$('from').value=w.a;$('to').value=w.b;$('color').value=w.color;
+message('提示：'+label(w.a)+' → '+label(w.b)+'；'+w.why+'。');renderBoard();updateControls();save();
+}
+function buildGraph(held1=km1,held2=km2){
+const d=bare();
+for(let i=1;i<=5;i++)d.join('FU'+i+'.in','FU'+i+'.out');
+for(let i=1;i<=3;i++)d.join('FR.L'+i,'FR.T'+i);
+if(!tripped)d.join('FR.95','FR.96');else d.join('FR.97','FR.98');
+for(let i=1;i<=3;i++){const k='SB'+i;d.join(k+(press[k]?'.NO.up':'.NC.up'),k+(press[k]?'.NO.down':'.NC.down'));}
+for(const [k,held] of [['KM1',held1],['KM2',held2]]){
+if(held){for(let i=1;i<=3;i++)d.join(k+'.L'+i,k+'.T'+i);}
+for(const p of held?['NO1','NO2']:['NC1','NC2'])d.join(k+'.'+p+'.up',k+'.'+p+'.down');
+}
+return d;
+}
+function phaseOf(id,d=phaseGraph){if(!power||!d)return null;return phases.find(p=>d.same(id,'QF.'+p))||null;}
+function voltage(d,k){if(!power)return 0;const a=phaseOf(k+'.A1',d),b=phaseOf(k+'.A2',d);return a&&b&&a!==b?380:0;}
+function cutPower(reason){
+power=false;km1=false;km2=false;coilV=0;coilV2=0;motor=false;direction='stop';phaseGraph=buildGraph(false,false);message(reason,true);
+}
+function settle(){
+if(!power){km1=false;km2=false;coilV=0;coilV2=0;motor=false;direction='stop';phaseGraph=buildGraph(false,false);return;}
+let stable=false;
+for(let i=0;i<8;i++){
+const d=buildGraph(km1,km2);
+const short=phases.some((p,j)=>phases.slice(j+1).some(q=>d.same('QF.'+p,'QF.'+q)));
+if(short){cutPower('检测到相间短接，模拟电源已断开。');return;}
+const next1=voltage(d,'KM1')===380,next2=voltage(d,'KM2')===380;
+if(next1&&next2){cutPower('两个启动同时请求吸合：仅电气互锁存在竞争，模拟电源已断开。');return;}
+if(next1===km1&&next2===km2){stable=true;break;}km1=next1;km2=next2;
+}
+if(!stable){cutPower('接触器状态无法稳定，模拟电源已断开。');return;}
+phaseGraph=buildGraph(km1,km2);coilV=voltage(phaseGraph,'KM1');coilV2=voltage(phaseGraph,'KM2');
+const ps=['M.U','M.V','M.W'].map(n=>phaseOf(n));motor=power&&ps.every(Boolean)&&new Set(ps).size===3;
+direction=motor?(ps.join(',')==='L1,L2,L3'?'forward':ps.join(',')==='L3,L2,L1'?'reverse':'unknown'):'stop';
+}
+function setPressed(key,value){
+if(!Object.hasOwn(press,key)||press[key]===value)return;
+press[key]=value;settle();
+if(value&&power&&((key==='SB2'&&km1)||(key==='SB1'&&km2)))message('对方接触器的常闭触点已断开：先按SB3停止，再换向。');
+else if(value&&power&&key==='SB1'&&km1)message('KM1吸合，电机正转；松开SB1后由NO₂自锁。');
+else if(value&&power&&key==='SB2'&&km2)message('KM2吸合，电机反转；松开SB2后由NO₂自锁。');
+else if(value&&power&&key==='SB3')message('SB3停止常闭断开，两只接触器释放。');
+renderAll();save();
+}
+function bindMomentary(id,key){
+const el=$(id);
+el.addEventListener('pointerdown',e=>{if(e.button!==0)return;try{el.setPointerCapture(e.pointerId);}catch{}setPressed(key,true);});
+const release=()=>setPressed(key,false);
+el.addEventListener('pointerup',release);el.addEventListener('pointercancel',release);el.addEventListener('lostpointercapture',release);
+el.addEventListener('keydown',e=>{if(e.key===' '||e.key==='Enter'){e.preventDefault();setPressed(key,true);}});
+el.addEventListener('keyup',e=>{if(e.key===' '||e.key==='Enter'){e.preventDefault();setPressed(key,false);}});
+el.addEventListener('blur',release);
+}
+function releaseAll(){Object.keys(press).forEach(k=>{if(press[k])setPressed(k,false);});}
+window.addEventListener('blur',releaseAll);
+document.addEventListener('visibilitychange',()=>{if(document.hidden)releaseAll();});
+function powerToggle(){
+if(power){power=false;km1=false;km2=false;releaseAll();message('已分闸；接触器释放，可修改接线。');}
+else{
+if(!check(false).ok){check();message('接线检查未通过，暂不能合闸。',true);return;}
+power=true;message('已合闸：SB1正转、SB2反转，先按SB3停止再换向。');
+}
+settle();renderAll();save();
+}
+function demo(){
+if(!canEdit())return;pushUndo();
+wires=reference.map((w,i)=>({a:w.a,b:w.b,color:w.color,id:i+1}));nextId=reference.length+1;
+selected=null;selectedWire=null;hints=[];invalid=[];result=null;
+message('已装入视频参考接线：35根。检查后可合闸体验，再重新练习。');settle();renderAll();save();
+}
+function newPractice(){
+if(!canEdit())return;pushUndo();wires=[];nextId=1;selected=null;selectedWire=null;hints=[];invalid=[];result=null;tripped=false;
+press={SB1:false,SB2:false,SB3:false};message('新的练习：电源已断开，从第一根线开始。');settle();renderAll();save();
+}
+function updateControls(){
+$('power').textContent=power?'分闸断电':'合闸试运行';$('power-tag').textContent=power?'已合闸 · 仿真中':'已断电';
+$('count').textContent='导线 '+wires.length+' / 35';$('km-status').textContent='KM1：'+(km1?'吸合':'释放')+' · KM2：'+(km2?'吸合':'释放');
+$('motor-status').textContent='电机：'+(direction==='forward'?'正转':direction==='reverse'?'反转':'停止');$('coil-status').textContent='线圈 KM1 / KM2：'+coilV+' / '+coilV2+' V';$('fr-status').textContent='FR：'+(tripped?'过载动作':'正常');
+const focus=focusedWire();
+$('focus').textContent=focus?'高亮导线 '+focus.id+' · '+colorNames[focus.color]+'线 · '+label(focus.a)+' → '+label(focus.b):'点击任意导线高亮；再点同一根或图中空白处取消。';
+$('delete').disabled=!selectedWire||power;$('undo').disabled=!undo.length||power;
+['demo','new','hint','connect'].forEach(id=>$(id).disabled=power);$('fr-reset').disabled=!tripped;
+['SB1','SB2','SB3'].forEach(k=>$('sb'+k.slice(-1)).setAttribute('aria-pressed',String(press[k])));
+$('board').toggleAttribute('hidden',view!=='board');$('scheme').toggleAttribute('hidden',view!=='scheme');$('wire-summary').textContent='导线清单 · '+wires.length+' 根';
+}
+function updateList(){
+const tbody=$('wire-list');tbody.replaceChildren();
+wires.forEach(w=>{
+const tr=document.createElement('tr'),num=document.createElement('td'),ends=document.createElement('td'),action=document.createElement('td');
+num.className='tabular-nums';num.textContent=w.id+' · '+colorNames[w.color];ends.textContent=label(w.a)+' → '+label(w.b);
+const bt=document.createElement('button');bt.type='button';bt.className='btn btn-ghost';bt.textContent='选择';
+bt.setAttribute('aria-label','选择导线'+w.id);bt.addEventListener('click',()=>selectWire(w.id));action.append(bt);tr.append(num,ends,action);tbody.append(tr);
+});
+}
+function S(tag,attrs={},content=null,parent){
+const el=document.createElementNS(NS,tag);for(const[k,v]of Object.entries(attrs))el.setAttribute(k,String(v));
+if(content!==null)el.textContent=content;if(parent)parent.append(el);return el;
+}
+function textAt(p,x,y,t,cls='',anchor='middle'){return S('text',{x,y,'text-anchor':anchor,class:cls},t,p);}
+function line(p,x1,y1,x2,y2,cls='rail'){return S('line',{x1,y1,x2,y2,class:cls},null,p);}
+function rect(p,x,y,width,height,cls='device-shell',rx=4){return S('rect',{x,y,width,height,rx,class:cls},null,p);}
+function node(p,id,x,y,dir='down',labelSide='above'){
+const n=nodeMap.get(id),focus=focusedWire(),endpoint=focus&&(focus.a===id||focus.b===id),g=S('g',{'data-node':id,class:'node cursor-interaction'+(endpoint?' wire-endpoint':'')+(selected===id?' selected':'')+(hints.includes(id)?' hinted':'')+(invalid.includes(id)?' invalid':'')},null,p);
+positions.set(id,{x,y,dir,dev:n.dev});
+S('title',{},label(id)+'；'+n.desc+'；已接'+count(id)+'根',g);
+S('circle',{cx:x,cy:y,r:22,class:'node-hit'},null,g);
+if(endpoint)S('circle',{cx:x,cy:y,r:15,class:'wire-endpoint-ring'},null,g);
+S('circle',{cx:x,cy:y,r:10,class:'screw-ring'},null,g);
+S('circle',{cx:x,cy:y,r:5.5,class:'screw-hole'},null,g);
+line(g,x-3,y+3,x+3,y-3,'screw-slot');
+const ly=labelSide==='above'?y-16:y+26;
+rect(g,x-n.label.length*3.7-3,ly-12,n.label.length*7.4+6,16,'device-label',1);
+textAt(g,x,ly,n.label);
+if(count(id))textAt(g,x+14,y+4,String(count(id)),'count');
+if(power&&flow&&phaseOf(id))S('circle',{cx:x-13,cy:y-11,r:3.5,class:'live-mark'},null,g);
+g.addEventListener('click',e=>{e.stopPropagation();pickNode(id);});
+}
+function layoutBoard(w){
+const narrow=w<650,m=22,gap=26,boxes=[];
+const put=(id,x,y,width)=>{const d=devices.find(d=>d.id===id);boxes.push({...d,x,y,w:width,h:d.height});};
+if(narrow){let y=16;for(const id of ['QF','FU','KM1','KM2','FR','M','SB1','SB2','SB3']){put(id,m,y,w-2*m);y+=devices.find(d=>d.id===id).height+32;}return{boxes,height:y+5,narrow};}
+const full=w-2*m,half=(full-gap)/2,bw=(full-gap*2)/3;
+put('QF',m,16,full);put('FU',m,210,full);
+['SB1','SB2','SB3'].forEach((id,i)=>put(id,m+i*(bw+gap),412,bw));
+put('KM1',m,652,half);put('KM2',m+half+gap,652,half);
+const rw=Math.min(440,full*.57);put('FR',m,948,rw);put('M',m+rw+gap,948,full-rw-gap);
+return{boxes,height:1210,narrow};
+}
+function rowXs(b,count,margin=25){return Array.from({length:count},(_,i)=>b.x+margin+(b.w-2*margin)*(count===1?.5:i/(count-1)));}
+function drawDevice(b,p){
+boxMap.set(b.id,b);textAt(p,b.x,b.y+13,b.name,'component-title','start');textAt(p,b.x,b.y+32,b.sub,'muted-label','start');
+const top=b.y+64;
+if(b.kind==='source'){
+const xs=rowXs(b,4);rect(p,b.x+8,b.y+43,b.w-16,98);
+for(let i=0;i<3;i++){rect(p,xs[i]-13,top+2,26,24,'device-face',2);rect(p,xs[i]-11,top+5,22,16,'device-dark',2);}
+textAt(p,b.x+b.w/2,top+75,power?'QF · 合闸':'QF · 分闸');
+['L1','L2','L3','PE'].forEach((n,i)=>node(p,'QF.'+n,xs[i],top+43,'down','above'));
+}else if(b.kind==='fuse'){
+rowXs(b,5,18).forEach((x,i)=>{
+rect(p,x-15,top-12,30,82,'device-shell',2);rect(p,x-9,top+18,18,24,'device-face',2);textAt(p,x,top+35,i<3?'主':'控');
+node(p,'FU'+(i+1)+'.in',x,top,'up','above');node(p,'FU'+(i+1)+'.out',x,top+60,'down','below');
+});
+}else if(b.kind==='contactor'){
+const held=b.id==='KM1'?km1:km2;const xs=rowXs(b,4,28);rect(p,b.x+8,top-12,b.w-16,174);
+['L1','L2','L3','A1'].forEach((n,i)=>node(p,b.id+'.'+n,xs[i],top,'up','above'));
+['NO1','NC1','NC2','NO2'].forEach((n,i)=>{
+node(p,b.id+'.'+n+'.up',xs[i],top+48,'up','above');node(p,b.id+'.'+n+'.down',xs[i],top+106,'down','below');
+const closed=n.startsWith('NC')?!held:held;line(p,xs[i],top+61,xs[i],top+72,'contact-path');
+line(p,xs[i],top+93,closed?xs[i]:xs[i]-10,top+72,'contact-path'+(closed?' on':''));
+});
+['T1','T2','T3','A2'].forEach((n,i)=>node(p,b.id+'.'+n,xs[i],top+164,'down','below'));
+rect(p,b.x+8,top+69,b.w-16,24,'device-dark',2);textAt(p,b.x+b.w/2,top+85,b.id+(held?' · 已吸合':' · 未吸合'));
+}else if(b.kind==='relay'){
+const xs=rowXs(b,5,18);rect(p,b.x+8,top-12,b.w-16,122);
+['L1','L2','L3','96','95'].forEach((n,i)=>node(p,'FR.'+n,xs[i],top,'up','above'));
+['T1','T2','T3','97','98'].forEach((n,i)=>node(p,'FR.'+n,xs[i],top+96,'down','below'));
+for(let i=0;i<3;i++){rect(p,xs[i]-11,top+22,22,42,'device-dark',2);line(p,xs[i],top+27,xs[i],top+60,'contact-path');}
+S('circle',{cx:(xs[3]+xs[4])/2,cy:top+42,r:17,class:'device-face'},null,p);textAt(p,(xs[3]+xs[4])/2,top+47,tripped?'跳':'FR');
+textAt(p,b.x+b.w/2,top+143,tripped?'95－96 断开；97－98 闭合':'95－96 闭合；97－98 断开','muted-label');
+}else if(b.kind==='motor'){
+const xs=rowXs(b,4,30),cx=b.x+b.w/2;
+rect(p,b.x+18,top+6,b.w-36,76,'device-dark',16);
+for(let i=0;i<7;i++)line(p,b.x+35+i*(b.w-70)/6,top+48,b.x+35+i*(b.w-70)/6,top+73,'rail');
+rect(p,b.x+18,top-10,b.w-36,44,'device-shell',3);
+['U','V','W','PE'].forEach((n,i)=>node(p,'M.'+n,xs[i],top+9,'up','above'));
+textAt(p,cx,top+52,'3~ M · '+(direction==='forward'?'正转':direction==='reverse'?'反转':'停止'));
+}else if(b.kind==='button'){
+const xs=rowXs(b,2,42),x=b.x+b.w/2;rect(p,b.x+13,top-10,b.w-26,112,'device-shell',4);
+node(p,b.id+'.NC.up',xs[1],top,'up','above');node(p,b.id+'.NO.up',xs[0],top,'up','above');
+node(p,b.id+'.NC.down',xs[1],top+83,'down','below');node(p,b.id+'.NO.down',xs[0],top+83,'down','below');
+S('circle',{cx:x,cy:top+42,r:22,class:'device-face'},null,p);textAt(p,x,top+47,press[b.id]?'按下':'松开');
+const nc=!press[b.id],no=press[b.id];
+line(p,xs[1],top+13,xs[1],top+34,'contact-path');line(p,xs[1],top+66,nc?xs[1]:xs[1]-10,top+34,'contact-path'+(nc?' on':''));
+line(p,xs[0],top+13,xs[0],top+34,'contact-path');line(p,xs[0],top+66,no?xs[0]:xs[0]-10,top+34,'contact-path'+(no?' on':''));
+textAt(p,b.x+b.w/2,top+132,'NC：'+(nc?'通':'断')+' · NO：'+(no?'通':'断'),'muted-label');
+}
+}
+function wirePath(w,i,wide){
+const a=positions.get(w.a),b=positions.get(w.b);if(!a||!b)return'';
+const ab=boxMap.get(a.dev),bb=boxMap.get(b.dev),stub=34+(i%3)*18,ay=a.y+(a.dir==='up'?-stub:stub),by=b.y+(b.dir==='up'?-stub:stub);
+const width=Math.max(260,Math.round(root.getBoundingClientRect().width));let pts;
+if(a.dev===b.dev&&Math.abs(a.y-b.y)<2){const y=Math.min(ay,by)-6-(i%3)*6;pts=[[a.x,a.y],[a.x,y],[b.x,y],[b.x,b.y]];}
+else if(wide&&a.dev!==b.dev&&Math.abs(ab.y-bb.y)<2&&a.dir===b.dir){
+const y=a.dir==='up'?Math.min(ay,by)-10-(i%4)*7:Math.max(ay,by)+10+(i%4)*7;pts=[[a.x,a.y],[a.x,y],[b.x,y],[b.x,b.y]];
+}else{
+let lane;
+if(wide&&a.dev.startsWith('KM')&&b.dev.startsWith('KM')&&a.dev!==b.dev)lane=width/2+(i%5-2)*4;
+else lane=i%2===0?6+(i%5)*3:width-6-(i%5)*3;
+if(a.dev!==b.dev&&Math.abs(ab.x-bb.x)<2&&ay<by&&Math.abs(by-ay)<150){const y=(ay+by)/2+(i%3-1)*6;pts=[[a.x,a.y],[a.x,ay],[a.x,y],[b.x,y],[b.x,by],[b.x,b.y]];}
+else pts=[[a.x,a.y],[a.x,ay],[lane,ay],[lane,by],[b.x,by],[b.x,b.y]];
+}
+return pts.map((p,j)=>(j?'L':'M')+p[0].toFixed(1)+','+p[1].toFixed(1)).join(' ');
+}
+function renderBoard(){
+const svg=$('board');if(view!=='board')return;
+const width=Math.max(260,Math.round(root.getBoundingClientRect().width)),layout=layoutBoard(width);
+svg.setAttribute('viewBox','0 0 '+width+' '+layout.height);svg.setAttribute('height',layout.height);svg.replaceChildren();positions=new Map();boxMap=new Map();
+S('title',{},'K2-2 实操台：68插孔，电机4端子，'+wires.length+'根导线',svg);
+S('desc',{},'电源、五个熔断器、两个接触器、热继电器、电机与三个按钮。点两个孔接线，或使用键盘接线区。导线交叉不表示连接。',svg);
+const defs=S('defs',{},null,svg),pattern=S('pattern',{id:'k22-pe-stripes',width:9,height:9,patternUnits:'userSpaceOnUse',patternTransform:'rotate(35)'},null,defs);
+S('rect',{width:9,height:9,fill:'var(--green)'},null,pattern);S('rect',{width:4.5,height:9,fill:'var(--yellow)'},null,pattern);
+const deviceLayer=S('g',{},null,svg);layout.boxes.forEach(b=>drawDevice(b,deviceLayer));
+const wireLayer=S('g',{'aria-label':'可选择的导线',class:'wire-layer'+(selectedWire?' has-selection':'')},null,svg);
+let foregroundWire=null;
+wires.forEach((w,i)=>{
+const d=wirePath(w,i,!layout.narrow),g=S('g',{'data-wire':w.id,class:'wire-group cursor-interaction'+(selectedWire===w.id?' wire-focused':'')},null,wireLayer);
+if(selectedWire===w.id){foregroundWire=g;S('path',{d,class:'wire-highlight-halo'},null,g);}
+S('title',{},'导线'+w.id+'：'+label(w.a)+' → '+label(w.b),g);
+const live=power&&flow&&Boolean(phaseOf(w.a));
+S('path',{d,class:'wire'+(selectedWire===w.id?' selected':'')+(live?' electric':power&&flow?' deenergized':''),stroke:w.color==='pe'?'url(#k22-pe-stripes)':colorValues[w.color]},null,g);
+S('path',{d,class:'wire-hit'},null,g);g.addEventListener('click',e=>{e.stopPropagation();selectWire(w.id);});
+});
+if(foregroundWire)wireLayer.append(foregroundWire);
+const savedPositions=[...positions];
+deviceLayer.querySelectorAll('g.node').forEach(g=>g.remove());
+const holes=S('g',{},null,svg);
+for(const[id,p]of savedPositions){const d=p.dev,below=id.endsWith('.down')||id.endsWith('.out')||/^KM[12]\.T/.test(id)||/^KM[12]\.A2$/.test(id)||id.startsWith('FR.T')||id==='FR.97'||id==='FR.98';
+node(holes,id,p.x,p.y,p.dir,below?'below':'above');}
+const labelLayer=S('g',{},null,svg);
+Array.from(deviceLayer.querySelectorAll('text.component-title,text.muted-label')).forEach(t=>{const b=t.getBBox();rect(labelLayer,b.x-2,b.y-1,b.width+4,b.height+2,'heading-label',0);labelLayer.append(t);});
+}
+function schematicContact(p,x,y,closed,name,side='left'){
+line(p,x,y-22,x,y-8,'contact-path');
+line(p,x,y+22,x,y+8,'contact-path');
+line(p,x,y+8,closed?x:x-11,y-8,'contact-path'+(closed?' on':''));
+if(name)textAt(p,x+(side==='right'?16:-16),y+4,name,'',side==='right'?'start':'end');
+}
+function drawMain(p,x,y,w){
+textAt(p,x,y+14,'主回路 · 对调 L1 / L3','component-title','start');
+const xs=[x+35,x+w/2,x+w-35],ky=y+255,ry=y+435;
+xs.forEach((cx,i)=>{
+textAt(p,cx,y+50,phases[i]);line(p,cx,y+59,cx,y+83,'contact-path');rect(p,cx-7,y+83,14,25,'device-face',0);line(p,cx,y+108,cx,y+142,'contact-path');
+line(p,cx,y+142,cx,ky-22,'contact-path');schematicContact(p,cx,ky,km1,'');line(p,cx,ky+22,cx,ry,'contact-path');
+});
+const rx=xs.map(cx=>cx+26);
+rx.forEach((cx,i)=>{line(p,xs[i],y+142,cx,y+166,'contact-path');line(p,cx,y+166,cx,ky-22,'contact-path');schematicContact(p,cx,ky,km2,'');line(p,cx,ky+22,cx,ky+66+i*12,'contact-path');line(p,cx,ky+66+i*12,xs[2-i],ky+66+i*12,'contact-path');line(p,xs[2-i],ky+66+i*12,xs[2-i],ry,'contact-path');});
+textAt(p,x+10,ky-45,'KM1','','start');textAt(p,x+w-6,ky-45,'KM2','','end');
+xs.forEach((cx,i)=>{S('circle',{cx,cy:ry,r:3,fill:'var(--foreground)'},null,p);rect(p,cx-9,ry,18,28,'device-face',0);line(p,cx,ry+28,cx,ry+68,'contact-path');line(p,cx,ry+68,x+w/2+(i-1)*14,ry+93,'contact-path');});
+textAt(p,x+w/2,ry-20,'FR 三相热元件');
+S('circle',{cx:x+w/2,cy:ry+120,r:29,class:'device-shell'},null,p);textAt(p,x+w/2,ry+118,'M');textAt(p,x+w/2,ry+136,'3~');
+textAt(p,x+w/2,ry+175,direction==='forward'?'正转：U=L1 V=L2 W=L3':direction==='reverse'?'反转：U=L3 V=L2 W=L1':'电机停止','muted-label');
+textAt(p,x+8,ry+135,'PE','','start');line(p,x+20,ry+119,x+w/2-29,ry+119,'contact-path');
+}
+function drawControl(p,x,y,w){
+textAt(p,x,y+14,'控制回路 · L1－L2','component-title','start');
+const a=x+45,b=x+w-88,ha=a+58,hb=b+58;
+textAt(p,a,y+48,'L1');line(p,a,y+55,a,y+72,'contact-path');rect(p,a-7,y+72,14,24,'device-face',0);textAt(p,a+17,y+88,'FU4','','start');
+line(p,a,y+96,a,y+127,'contact-path');schematicContact(p,a,y+149,!tripped,'');textAt(p,a+17,y+153,'FR 95－96','','start');
+line(p,a,y+171,a,y+200,'contact-path');schematicContact(p,a,y+222,!press.SB3,'');textAt(p,a+17,y+226,'SB3 NC','','start');
+line(p,a,y+244,a,y+273,'contact-path');line(p,a,y+273,hb,y+273,'contact-path');
+for(const [cx,hx,k,button,other,held,otherHeld] of [[a,ha,'KM1','SB1','KM2',km1,km2],[b,hb,'KM2','SB2','KM1',km2,km1]]){
+line(p,cx,y+273,cx,y+312,'contact-path');line(p,hx,y+273,hx,y+312,'contact-path');schematicContact(p,cx,y+334,press[button],'');schematicContact(p,hx,y+334,held,'');
+textAt(p,cx,y+295,button+' NO');textAt(p,hx,y+295,k+' NO₂');
+line(p,cx,y+356,cx,y+385,'contact-path');line(p,hx,y+356,hx,y+385,'contact-path');line(p,cx,y+385,hx,y+385,'contact-path');
+line(p,cx,y+385,cx,y+422,'contact-path');schematicContact(p,cx,y+444,!otherHeld,'');textAt(p,cx+17,y+449,other+(other==='KM1'?' NC₂':' NC₁'),'','start');
+line(p,cx,y+466,cx,y+505,'contact-path');rect(p,cx-16,y+505,32,24,'device-face',0);textAt(p,cx+22,y+522,k,'','start');line(p,cx,y+529,cx,y+572,'contact-path');
+S('circle',{cx,cy:y+385,r:3,fill:'var(--foreground)'},null,p);
+}
+line(p,a,y+572,b,y+572,'contact-path');line(p,a,y+572,a,y+604,'contact-path');rect(p,a-7,y+604,14,24,'device-face',0);textAt(p,a+17,y+620,'FU5','','start');line(p,a,y+628,a,y+650,'contact-path');textAt(p,a,y+674,'L2');
+}
+function renderScheme(){
+if(view!=='scheme')return;const svg=$('scheme'),w=Math.max(260,Math.round(root.getBoundingClientRect().width)),narrow=w<720;
+const h=narrow?1380:720;svg.setAttribute('viewBox','0 0 '+w+' '+h);svg.setAttribute('height',h);svg.replaceChildren();
+S('title',{},'K2-2接触器互锁正反转原理图',svg);S('desc',{},'KM1正转，KM2对调第一第三相反转。SB1与KM1常开自锁并联后串KM2常闭再接KM1线圈；SB2与KM2常开自锁并联后串KM1常闭再接KM2线圈。SB3和FR常闭共同停止。',svg);
+if(narrow){drawMain(svg,20,12,w-40);drawControl(svg,4,680,w-8);}else{const mw=Math.min(290,w*.39);drawMain(svg,16,12,mw-24);drawControl(svg,mw+10,12,w-mw-28);}
+}
+function renderAll(){updateControls();showResult();renderBoard();renderScheme();updateList();}
+for(const id of['from','to']){
+const select=$(id),empty=document.createElement('option');empty.value='';empty.textContent='选择孔位';select.append(empty);
+devices.forEach(d=>{const group=document.createElement('optgroup');group.label=d.name;
+nodes.filter(n=>n.dev===d.id).forEach(n=>{const op=document.createElement('option');op.value=n.id;op.textContent=n.label+' · '+n.desc;group.append(op);});select.append(group);});
+}
+$('board').addEventListener('click',e=>{
+if(selectedWire&&!e.target.closest('[data-wire],[data-node]'))clearWireFocus();
+});
+root.addEventListener('keydown',e=>{if(e.key==='Escape'&&selectedWire){e.preventDefault();clearWireFocus();}});
+$('connect').addEventListener('click',()=>connect($('from').value,$('to').value));
+$('delete').addEventListener('click',()=>removeWire(selectedWire));
+$('check').addEventListener('click',()=>check());
+$('power').addEventListener('click',powerToggle);$('hint').addEventListener('click',nextHint);$('demo').addEventListener('click',demo);$('new').addEventListener('click',newPractice);
+$('undo').addEventListener('click',()=>{
+if(!canEdit()||!undo.length)return;wires=undo.pop();nextId=Math.max(0,...wires.map(w=>w.id))+1;
+selected=null;selectedWire=null;hints=[];invalid=[];result=null;message('已撤销上一次接线操作。');settle();renderAll();save();
+});
+$('view').addEventListener('change',()=>{view=$('view').value;renderAll();save();});
+$('flow').addEventListener('change',()=>{flow=$('flow').checked;renderBoard();save();});
+$('color').addEventListener('change',()=>{
+if(selectedWire&&canEdit()){const w=wires.find(w=>w.id===selectedWire);if(w){pushUndo();w.color=$('color').value;renderBoard();updateList();}}
+save();
+});
+function trip(){tripped=true;settle();message('FR过载动作：95－96断开，两只接触器释放。');renderAll();save();}
+function resetFR(){tripped=false;settle();message('FR已复位。按钮松开时不会自行启动。');renderAll();save();}
+$('trip').addEventListener('click',trip);$('fr-reset').addEventListener('click',resetFR);
+bindMomentary('sb1','SB1');bindMomentary('sb2','SB2');bindMomentary('sb3','SB3');
+let resizeQueued=false;
+new ResizeObserver(()=>{if(resizeQueued)return;resizeQueued=true;requestAnimationFrame(()=>{resizeQueued=false;renderBoard();renderScheme();});}).observe(root);
+window.addEventListener('openai:set_globals',event=>{if(event.detail?.globals?.widgetState)restore(event.detail.globals.widgetState);});
+root.__k22={
+model,check:()=>check(false),connect,demo,newPractice,setPressed,powerToggle,trip,resetFR,removeWire,pickNode,restore,
+state:()=>({power,km1,km2,tripped,motor,direction,coilV,coilV2,motorPhases:['M.U','M.V','M.W'].map(id=>phaseOf(id)),selectedWire,press:{...press},wires:wires.map(w=>({...w})),result}),
+loadWires:input=>{power=false;km1=false;km2=false;press={SB1:false,SB2:false,SB3:false};tripped=false;
+wires=input.map((w,i)=>({...w,id:i+1}));nextId=wires.length+1;selected=null;selectedWire=null;hints=[];invalid=[];result=null;settle();renderAll();}
+};
+const saved=window.openai?.widgetState;
+const savedPrivate=saved?.privateContent||saved;
+if(savedPrivate?.version===1&&savedPrivate.circuit==='K2-2'&&Array.isArray(savedPrivate.wires)){
+ settle();renderAll();restore(saved);
+}else{
+ wires=[];nextId=1;result=null;settle();renderAll();
+ message('空白练习：点两个孔接线；点击“完整参考接线”查看全部接法。');
+}
+})();
+</script>

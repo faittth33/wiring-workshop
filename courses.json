@@ -1,0 +1,30 @@
+[
+  {
+    "id": "k2-1",
+    "prefix": "k2",
+    "title": "点动与连续运行",
+    "description": "练习点动、自锁与停止控制",
+    "count": 25
+  },
+  {
+    "id": "k2-2",
+    "prefix": "k22",
+    "title": "接触器互锁正反转",
+    "description": "练习相序切换与电气互锁",
+    "count": 35
+  },
+  {
+    "id": "k2-3",
+    "prefix": "k23",
+    "title": "照明与插座电路",
+    "description": "练习双控照明与漏电保护",
+    "count": 17
+  },
+  {
+    "id": "k2-4",
+    "prefix": "k24",
+    "title": "连续运行与电流测量",
+    "description": "练习电流互感器穿心与接地",
+    "count": 25
+  }
+]
