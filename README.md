@@ -2,6 +2,10 @@
 
 四套电工实操接线交互练习。纯静态网页，无需登录，不依赖后端或外部 API。
 
+**在线练习：** https://faittth33.github.io/wiring-workshop/
+
+**源码仓库：** https://github.com/faittth33/wiring-workshop
+
 ## 四套课程
 
 | 课程 | 内容 | 完整参考导线 |
